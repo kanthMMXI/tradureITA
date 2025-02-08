@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translate Italian to Sinhala/Tagalog Audio</title>
+    <style>
+        body {
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Flag_of_Italy.svg/1280px-Flag_of_Italy.svg.png'), 
+                              url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Flag_of_Sri_Lanka.svg/1280px-Flag_of_Sri_Lanka.svg.png'),
+                              url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_the_Philippines.svg/1280px-Flag_of_the_Philippines.svg.png');
+            background-size: 33.33% 100%, 33.33% 100%, 33.33% 100%;
+            background-repeat: no-repeat;
+            background-position: top left, top center, top right;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: white;
+            padding: 50px 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        select, button {
+            padding: 10px;
+            margin: 10px;
+        }
+
+        audio {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Translate Italian to Sinhala/Tagalog Audio</h1>
+        <textarea id="italianText" placeholder="Enter Italian text here"></textarea><br>
+        <select id="languageSelect">
+            <option value="si">Sinhala</option>
+            <option value="tl">Tagalog</option>
+        </select><br>
+        <button onclick="translateText()">Translate & Speak</button><br>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <script>
+        async function translateText() {
+            const text = document.getElementById('italianText').value;
+            const language = document.getElementById('languageSelect').value;
+
+            // Send request to LibreTranslate (free translation API)
+            const translationResponse = await fetch('https://libretranslate.de/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    q: text,
+                    source: 'it', // Italian as the source language
+                    target: language // Target language (si for Sinhala, tl for Tagalog)
+                })
+            });
+
+            const translationData = await translationResponse.json();
+            const translatedText = translationData.translatedText;
+
+            // Convert text to speech using Web Speech API
+            const utterance = new SpeechSynthesisUtterance(translatedText);
+            utterance.lang = language === 'si' ? 'si-LK' : 'tl-PH'; // Sinhala and Tagalog voices
+            window.speechSynthesis.speak(utterance);
+            
+            // Optionally, show the translated text in the player
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = `https://code.responsivevoice.org/getvoice.php?t=${encodeURIComponent(translatedText)}&lang=${language}`;
+        }
+    </script>
+</body>
+</html>
